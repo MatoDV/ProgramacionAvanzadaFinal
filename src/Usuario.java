@@ -6,7 +6,11 @@ public class Usuario {
     private int saldo;
 
     public Usuario(int idUsuario, String nombre, String numeroCuenta, String pin, int saldo) {
-
+        this.idUsuario = idUsuario;
+        this.nombre = nombre;
+        this.numeroCuenta = numeroCuenta;
+        this.pin = pin;
+        this.saldo = saldo;
     }
 
     public int getIdUsuario() {

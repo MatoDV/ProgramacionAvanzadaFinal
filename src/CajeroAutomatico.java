@@ -3,20 +3,28 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
-public class CajeroAutomatico {
+public class CajeroAutomatico implements ServiciosCajero{
     private static Connection connection;
     private static UsuarioDAO usuarioDAO;
     private static TransaccionDAO transaccionDAO;
     private static Scanner scanner = new Scanner(System.in);
+    public Usuario usuario;
+
 
     public static void main(String[] args) {
-
         try {
             connection = ConexionBD.getConnection();
             usuarioDAO = new UsuarioDAO(connection);
             transaccionDAO = new TransaccionDAO(connection);
 
-            iniciarSesion();
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Ingrese su número de cuenta:");
+            String numeroCuenta = scanner.nextLine();
+            System.out.println("Ingrese su PIN:");
+            String pin = scanner.nextLine();
+
+            CajeroAutomatico cajeroAutomatico = new CajeroAutomatico();
+            cajeroAutomatico.iniciarSesion(numeroCuenta, pin); // Llamada al método iniciarSesion() con los argumentos adecuados
         } catch (SQLException e) {
             System.out.println("Error al conectar a la base de datos: " + e.getMessage());
         } finally {
@@ -30,18 +38,14 @@ public class CajeroAutomatico {
         }
     }
 
-    private static void iniciarSesion() {
-        System.out.println("Ingrese su número de cuenta:");
-        String numeroCuenta = scanner.nextLine();
 
-        System.out.println("Ingrese su PIN:");
-        String pin = scanner.nextLine();
-
+    @Override
+    public void iniciarSesion(String numeroCuenta, String pin) {
         try {
-            Usuario usuario = usuarioDAO.iniciarSesion(numeroCuenta, pin);
+            usuario = usuarioDAO.iniciarSesion(numeroCuenta, pin);
             if (usuario != null) {
                 System.out.println("Inicio de sesión exitoso");
-                mostrarMenu(usuario);
+                mostrarMenu();
             } else {
                 System.out.println("Credenciales incorrectas. Intente nuevamente.");
             }
@@ -50,47 +54,56 @@ public class CajeroAutomatico {
         }
     }
 
-    private static void mostrarMenu(Usuario usuario) {
-        System.out.println("\nMenú:");
-        System.out.println("1. Consultar Saldo");
-        System.out.println("2. Realizar Retiro");
-        System.out.println("3. Realizar Depósito");
-        System.out.println("4. Realizar Transferencia");
-        System.out.println("5. Cambiar PIN");
-        System.out.println("6. Ver Historial de Transacciones");
-        System.out.println("7. Cerrar Sesión");
-        System.out.println("Seleccione una opción:");
 
-        int opcion = Integer.parseInt(scanner.nextLine());
+        private void mostrarMenu() {
+            boolean salir = false;
+            while (!salir) {
+                System.out.println("\nMenú:");
+                System.out.println("1. Consultar Saldo");
+                System.out.println("2. Realizar Retiro");
+                System.out.println("3. Realizar Depósito");
+                System.out.println("4. Realizar Transferencia");
+                System.out.println("5. Cambiar PIN");
+                System.out.println("6. Ver Historial de Transacciones");
+                System.out.println("7. Cerrar Sesión");
+                System.out.println("Seleccione una opción:");
 
-        switch (opcion) {
-            case 1:
-                consultarSaldo(usuario);
-                break;
-            case 2:
-                realizarRetiro(usuario);
-                break;
-            case 3:
-                realizarDeposito(usuario);
-                break;
-            case 4:
-                realizarTransferencia(usuario);
-                break;
-            case 5:
-                cambiarPIN(usuario);
-                break;
-            case 6:
-                verHistorialTransacciones(usuario);
-                break;
-            case 7:
-                System.out.println("Sesión cerrada correctamente");
-                break;
-            default:
-                System.out.println("Opción no válida");
+
+                int opcion = Integer.parseInt(scanner.nextLine());
+                int cantidad = 0;
+                String cuentaDestino = "";
+                String nuevoPIN = "";
+                switch (opcion) {
+                    case 1:
+                        consultarSaldo();
+                        break;
+                    case 2:
+                        retirar(cantidad);
+                        break;
+                    case 3:
+                        depositar(cantidad);
+                        break;
+                    case 4:
+                        transferir(cuentaDestino, cantidad);
+                        break;
+                    case 5:
+                        cambiarPIN(nuevoPIN);
+                        break;
+                    case 6:
+                        obtenerHistorialOperaciones();
+                        break;
+                    case 7:
+                        cerrarSesion();
+                        salir = true; // Salir del bucle y cerrar sesión
+                        break;
+                    default:
+                        System.out.println("Opción no válida");
+                }
+            }
         }
-    }
 
-    private static void consultarSaldo(Usuario usuario) {
+    @Override
+    public void consultarSaldo() {
         try {
             int saldo = usuarioDAO.consultarSaldo(usuario.getNumeroCuenta());
             System.out.println("Saldo actual: $" + saldo);
@@ -99,9 +112,10 @@ public class CajeroAutomatico {
         }
     }
 
-    private static void realizarRetiro(Usuario usuario) {
-        System.out.println("Ingrese la cantidad a retirar:");
-        int cantidad = Integer.parseInt(scanner.nextLine());
+    @Override
+    public void retirar(int cantidad) {
+        System.out.println("Ingrese la cantidad a retirar: ");
+        cantidad = Integer.parseInt(scanner.nextLine());
 
         try {
             int saldoActual = usuarioDAO.consultarSaldo(usuario.getNumeroCuenta());
@@ -118,9 +132,10 @@ public class CajeroAutomatico {
         }
     }
 
-    private static void realizarDeposito(Usuario usuario) {
-        System.out.println("Ingrese la cantidad a depositar:");
-        int cantidad = Integer.parseInt(scanner.nextLine());
+    @Override
+    public void depositar(int cantidad) {
+        System.out.println("Ingrese la cantidad a depositar: ");
+        cantidad = Integer.parseInt(scanner.nextLine());
 
         try {
             int saldoActual = usuarioDAO.consultarSaldo(usuario.getNumeroCuenta());
@@ -133,12 +148,12 @@ public class CajeroAutomatico {
         }
     }
 
-    private static void realizarTransferencia(Usuario usuario) {
-        System.out.println("Ingrese el número de cuenta de destino:");
-        String cuentaDestino = scanner.nextLine();
-
-        System.out.println("Ingrese la cantidad a transferir:");
-        int cantidad = Integer.parseInt(scanner.nextLine());
+    @Override
+    public void transferir(String cuentaDestino, int cantidad) {
+        System.out.println("Ingrese el número de cuenta de destino: ");
+        cuentaDestino = scanner.nextLine();
+        System.out.println("Ingrese la cantidad a transferir: ");
+        cantidad = Integer.parseInt(scanner.nextLine());
 
         try {
             int saldoActual = usuarioDAO.consultarSaldo(usuario.getNumeroCuenta());
@@ -157,9 +172,10 @@ public class CajeroAutomatico {
         }
     }
 
-    private static void cambiarPIN(Usuario usuario) {
-        System.out.println("Ingrese el nuevo PIN:");
-        String nuevoPIN = scanner.nextLine();
+    @Override
+    public void cambiarPIN(String nuevoPIN) {
+        System.out.println("Ingrese el nuevo PIN: ");
+        nuevoPIN = scanner.nextLine();
 
         try {
             usuarioDAO.cambiarPIN(usuario.getNumeroCuenta(), nuevoPIN);
@@ -169,15 +185,25 @@ public class CajeroAutomatico {
         }
     }
 
-    private static void verHistorialTransacciones(Usuario usuario) {
+    public void obtenerHistorialOperaciones() {
         try {
             List<Transaccion> transacciones = transaccionDAO.obtenerTransaccionesUsuario(usuario.getIdUsuario());
             System.out.println("Historial de Transacciones:");
             for (Transaccion transaccion : transacciones) {
-                System.out.println(transaccion);
+                System.out.println("ID de Cuenta: " + transaccion.getIdTransaccion());
+                System.out.println("Tipo: " + transaccion.getTipo());
+                System.out.println("Monto: " + transaccion.getMonto());
+                System.out.println("Fecha: " + transaccion.getFecha());
+                System.out.println("--------------------");
             }
         } catch (SQLException e) {
             System.out.println("Error al obtener el historial de transacciones: " + e.getMessage());
         }
     }
+
+    @Override
+    public void cerrarSesion() {
+        usuario = null;
+    }
 }
+

@@ -5,8 +5,15 @@ public class Transaccion {
     private int idUsuario;
     private String tipo;
     private int monto;
+    private String cuentaDestino;
     private Date fecha;
-    public Transaccion(int idTransaccion, int idUsuario, String tipo, int monto, Date fecha) {
+    public Transaccion(int idTransaccion, int idUsuario, String tipo, int monto, String cuentaDestino, Date fecha) {
+        this.idTransaccion = idTransaccion;
+        this.idUsuario = idUsuario;
+        this.tipo = tipo;
+        this.monto = monto;
+        this.cuentaDestino = cuentaDestino;
+        this.fecha = fecha;
     }
 
     public int getIdTransaccion() {
@@ -47,5 +54,13 @@ public class Transaccion {
 
     public void setFecha(Date fecha) {
         this.fecha = fecha;
+    }
+
+    public String getCuentaDestino() {
+        return cuentaDestino;
+    }
+
+    public void setCuentaDestino(String cuentaDestino) {
+        this.cuentaDestino = cuentaDestino;
     }
 }

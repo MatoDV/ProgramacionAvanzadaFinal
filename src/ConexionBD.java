@@ -10,7 +10,7 @@ public class ConexionBD {
 
     public static Connection getConnection() throws SQLException {
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/cajeroautomatico","root","");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/cajeroautomatico","root","mati123456789");
             System.out.println("Conexión exitosa a la base de datos");
             return connection;
         } catch (SQLException e) {

@@ -13,7 +13,7 @@ public class TransaccionDAO {
     }
 
     public void realizarTransaccion(int idUsuario, String tipo, int monto) throws SQLException {
-        String query = "INSERT INTO transacciones (id_usuario, tipo, monto) VALUES (?, ?, ?)";
+        String query = "INSERT INTO transacciones (id_usuario, tipo_transaccion, cantidad) VALUES (?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, idUsuario);
             statement.setString(2, tipo);
@@ -32,9 +32,10 @@ public class TransaccionDAO {
                     transacciones.add(new Transaccion(
                             resultSet.getInt("id_transaccion"),
                             resultSet.getInt("id_usuario"),
-                            resultSet.getString("tipo"),
-                            resultSet.getInt("monto"),
-                            resultSet.getDate("fecha")
+                            resultSet.getString("tipo_transaccion"),
+                            resultSet.getInt("cantidad"),
+                            resultSet.getString("cuenta_destino"),
+                            resultSet.getDate("fecha_hora")
                     ));
                 }
             }

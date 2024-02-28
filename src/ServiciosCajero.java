@@ -6,4 +6,5 @@ public interface ServiciosCajero {
     void transferir(String cuentaDestino, int cantidad);
     void cambiarPIN(String nuevoPIN);
     void cerrarSesion();
+    void obtenerHistorialOperaciones();
 }
